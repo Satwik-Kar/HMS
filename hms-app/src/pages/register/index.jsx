@@ -1,11 +1,28 @@
 "use client";
 import {useState} from "react";
 import "../../app/globals.css";
-import {encrypt} from "@/app/security/cryptography";
-import {error} from "next/dist/build/output/log";
+import {v4 as uuidv4} from 'uuid';
+import {addDoc, collection} from 'firebase/firestore';
 
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {encrypt} from "@/app/security/cryptography";
+import User from "@/app/models/User";
+import {db} from "../../../firebase.config";
+import Hashing from "@/app/security/Hashing";
+import Loader from "@/app/components/loader_component";
+
+const addUser = async (details) => {
+    try {
+        const docRef = await addDoc(collection(db, "users"), details);
+        console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
+};
 export default function Registration() {
     // State variables for form inputs
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
@@ -26,21 +43,44 @@ export default function Registration() {
 
     // Handle form submission
     const submit = (e) => {
+        setLoading(true);
         e.preventDefault();
-        const countryCodeRegex = /^\+\d+/;
 
 
         const name = formData.fullName;
-        const email = formData.email;
+        let email = formData.email;
         const password = formData.password;
-        const confirmPassword = formData.confirmPassword;
+        let confirmPassword = formData.confirmPassword;
         const phone = formData.contact
         const role = formData.role;
-        let status = performCheck(name, email, password,confirmPassword,phone,role);
-        if (status.success){
+        let status = performCheck(name, email, password, confirmPassword, phone, role);
+        if (status.success) {
             console.log("success");
-        }else{
-           let errors = status.errors;
+            let uid = uuidv4();
+            email = encrypt(email)
+            confirmPassword = Hashing.hashPassword(confirmPassword)
+            let user = new User(uid, name, email, confirmPassword, role, phone, "", {})
+            let obj = user.toFirestore()
+            addUser(obj).then(() => {
+                toast("SUCCESS")
+                setLoading(false);
+
+            }).catch((err) => {
+                toast("FAILED")
+                setLoading(false);
+
+
+            })
+
+
+        } else {
+            let errors = status.errors;
+            for (let i = 0; i < errors.length; i++) {
+                toast(errors[i])
+
+            }
+            setLoading(false);
+
 
         }
 
@@ -55,36 +95,36 @@ export default function Registration() {
         let errors = []
         if (name.length > 0) {
             idx += 1;
-        }else{
-            errors.push("name")
+        } else {
+            errors.push("Name should not be empty")
         }
         if (emailRegex.test(email)) {
             idx += 1;
-        }else{
-            errors.push("email")
+        } else {
+            errors.push("Wrong email format")
         }
-        if (password===confirmPassword) {
+        if (password === confirmPassword) {
             idx += 1;
-        }else{
-            errors.push("password")
+        } else {
+            errors.push("Confirm password mismatch")
         }
 
         if (phoneRegex.test(phone)) {
             idx += 1
-        }else{
-            errors.push("phone")
+        } else {
+            errors.push("Add country code to phone number")
         }
         if (roles.includes(role)) {
             idx += 1;
-        }else{
-            errors.push("role")
+        } else {
+            errors.push("Select a role")
         }
 
         if ((errors.length === 0) && (idx === _idx)) {
-            return {success:true}
-        }else{
+            return {success: true}
+        } else {
 
-            return {success:false,errors:errors}
+            return {success: false, errors: errors}
         }
 
     }
@@ -217,13 +257,15 @@ export default function Registration() {
                     </div>
 
                     {/* Submit Button */}
-                    <div className="flex justify-center">
-                        <button
+                    <div className="flex justify-center items-center">
+                        {loading ? (<Loader/>) : (<button
                             type="submit"
                             className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-black"
                         >
                             Register
-                        </button>
+                        </button>)}
+
+
                     </div>
                 </form>
 
@@ -235,6 +277,7 @@ export default function Registration() {
                     </a>
                 </p>
             </div>
+            <ToastContainer/>
         </div>
     );
 }

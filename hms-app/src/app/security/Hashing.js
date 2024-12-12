@@ -1,13 +1,12 @@
-import bcrypt from 'bcrypt';
-// hash
-export async function hashPassword(password) {
-  const saltRounds = 10; // Define the number of hashing rounds
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  return hashedPassword;
-}
+// Corrected Hashing.js
+import { createHash } from 'crypto'; // Using 'crypto' for hashing
 
-//verify
-export async function verifyPassword(password, hashedPassword) {
-  const isMatch = await bcrypt.compare(password, hashedPassword);
-  return isMatch;
-}
+const Hashing = {
+  hashPassword: (password) => {
+    const salt = process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
+    const hash = createHash('sha256').update(password + salt).digest('hex');
+    return hash;
+  }
+};
+
+export default Hashing;
