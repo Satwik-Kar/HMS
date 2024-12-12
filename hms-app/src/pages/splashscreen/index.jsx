@@ -1,22 +1,19 @@
 "use client";
-import Loader from '../app/components/loader_component';
-import {useEffect, useState} from "react";
-import {db} from "../../firebase.config";
-import {addDoc, collection} from "firebase/firestore";
-import User from "@/app/models/User";
-
-// const user = new User(123, "Satwik", "password", "admin", 9583699739, "fakirpur", "");
-
-
+import Loader from '../../app/components/loader_component';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import '../../app/globals.css'
 export default function Home() {
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        //api loads
+        const timeout = setTimeout(() => {
+            router.push('/register');
+        }, 3000);
 
-
-
-    }, []);
-    const [loading, setLoading] = useState(true);
+        return () => clearTimeout(timeout);
+    }, [router]);
 
     return (
         <>
@@ -33,8 +30,7 @@ export default function Home() {
             <div
                 className="bg-primary w-screen h-screen flex justify-center items-center font-[family-name:var(--font-geist-sans)]"
             >
-                <div className="flex   w-max h-max flex-col justify-center items-center">
-
+                <div className="flex w-max h-max flex-col justify-center items-center">
                     <img
                         src={"/logos/primary_lg.webp"}
                         alt="primary logo"
@@ -42,10 +38,9 @@ export default function Home() {
                     />
 
                     <div className="flex">
-                        {loading && <Loader/>}
+                        {loading && <Loader />}
                     </div>
                 </div>
-
             </div>
         </>
     );
