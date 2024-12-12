@@ -1,8 +1,21 @@
 "use client";
 import Loader from '../app/components/loader_component';
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import {db} from "../../firebase.config";
+import {addDoc, collection} from "firebase/firestore";
+import User from "@/app/models/User";
+
+// const user = new User(123, "Satwik", "password", "admin", 9583699739, "fakirpur", "");
+
 
 export default function Home() {
+
+    useEffect(() => {
+        //api loads
+
+
+
+    }, []);
     const [loading, setLoading] = useState(true);
 
     return (
