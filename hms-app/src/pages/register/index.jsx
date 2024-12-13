@@ -62,11 +62,11 @@ export default function Registration() {
             let user = new User(uid, name, email, confirmPassword, role, phone, "", {})
             let obj = user.toFirestore()
             addUser(obj).then(() => {
-                toast("SUCCESS")
+                toast("SUCCESS",{style:{backgroundColor: '#4caf50', color: '#fff'}})
                 setLoading(false);
 
             }).catch((err) => {
-                toast("FAILED")
+                toast("SUCCESS",{style:{backgroundColor: '#FF4D4F', color: '#fff'}})
                 setLoading(false);
 
 
@@ -76,7 +76,7 @@ export default function Registration() {
         } else {
             let errors = status.errors;
             for (let i = 0; i < errors.length; i++) {
-                toast(errors[i])
+                toast(errors[i],{style:{backgroundColor: '#FF4D4F', color: '#fff'}})
 
             }
             setLoading(false);
