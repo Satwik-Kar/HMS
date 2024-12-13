@@ -78,6 +78,8 @@ export default function Login() {
 
     }
 
+    const router = useRouter();
+
     // Handle form submission
     const submitLogin = (e) => {
         e.preventDefault();
@@ -94,7 +96,6 @@ export default function Login() {
             checkUserExists(user).then((status) => {
                 console.log(status);
                 if (status) {
-                    const router = useRouter();
                     router.push('/home');
                 }
                 setLoading(false)
