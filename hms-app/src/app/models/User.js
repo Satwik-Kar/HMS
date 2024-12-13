@@ -1,14 +1,14 @@
 class User {
 
     constructor(
-        id,
-        name,
+        id=null,
+        name=null,
         email,
         password,
         role,
-        phoneNumber,
-        address,
-        additionalDetails = {},
+        phoneNumber=null,
+        address=null,
+        additionalDetails = null,
     ) {
         this.id = id;
         this.name = name;
@@ -18,6 +18,10 @@ class User {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.additionalDetails = additionalDetails; // Role-specific details
+    }
+
+    static createBasic(email, password, role) {
+        return new User(null,null,email,password,role,null,null,null);
     }
 
 

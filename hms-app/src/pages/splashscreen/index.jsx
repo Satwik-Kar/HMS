@@ -3,7 +3,7 @@ import Loader from '../../app/components/loader_component';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import '../../app/globals.css'
-export default function Home() {
+export default function SplashScreen() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 

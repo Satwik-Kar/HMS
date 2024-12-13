@@ -1,34 +1,24 @@
 "use client";
 import {useState} from "react";
 import "../../app/globals.css";
-import {v4 as uuidv4} from 'uuid';
-import {addDoc, collection} from 'firebase/firestore';
 
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {encrypt} from "@/app/security/cryptography";
+import {decrypt} from "@/app/security/cryptography";
 import User from "@/app/models/User";
-import {db} from "../../../firebase.config";
 import Hashing from "@/app/security/Hashing";
 import Loader from "@/app/components/loader_component";
+import {db} from "../../../firebase.config";
+import {collection, getDocs} from "firebase/firestore";
+import {useRouter} from "next/navigation";
 
-const addUser = async (details) => {
-    try {
-        const docRef = await addDoc(collection(db, "users"), details);
-        console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-        console.error("Error adding document: ", e);
-    }
-};
-export default function Registration() {
+
+export default function Login() {
     // State variables for form inputs
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        fullName: "",
         email: "",
         password: "",
-        confirmPassword: "",
-        contact: "",
         role: "",
     });
 
@@ -41,51 +31,86 @@ export default function Registration() {
         }));
     };
 
+    function getSnapshotDocument(querySnapShot, email) {
+
+        for (const doc of querySnapShot.docs) {
+            const encryptedEmail = doc.data().email;
+            const decryptedEmail = decrypt(encryptedEmail);
+
+            if (decryptedEmail === email) {
+                console.log("User exists:", doc.id);
+                return doc.data();
+            }
+
+        }
+        return -1
+    }
+
+    async function checkUserExists(user) {
+        console.log(user);
+        const usersCollection = collection(db, "users");
+        const email = user.email
+        const password = user.password
+        const role = user.role
+        const querySnapshot = await getDocs(usersCollection);
+        let userDoc = getSnapshotDocument(querySnapshot, email)
+        if (userDoc !== -1) {
+            const storedHashedPassword = userDoc.password;
+            const storedRole = userDoc.role;
+            const comparePassword = Hashing.compareHash(password, storedHashedPassword);
+
+            let roleMatch = role === storedRole;
+            if (comparePassword && roleMatch) {
+                toast("Login successful", {style: {backgroundColor: '#4caf50', color: '#fff'}})
+                return true;
+
+            } else {
+                toast("Credentials mismatch", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
+                return false;
+
+            }
+        } else {
+
+            toast("User do not exist", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
+            return false;
+        }
+
+
+    }
+
     // Handle form submission
-    const submit = (e) => {
-          e.preventDefault();
+    const submitLogin = (e) => {
+        e.preventDefault();
         setLoading(true);
 
 
-
-        const name = formData.fullName;
         let email = formData.email;
         const password = formData.password;
-        let confirmPassword = formData.confirmPassword;
-        const phone = formData.contact
         const role = formData.role;
-        let status = performCheck(name, email, password, confirmPassword, phone, role);
+        let status = performCheck(email, password, role);
         if (status.success) {
             console.log("success");
-            let uid = uuidv4();
-            email = encrypt(email)
-            confirmPassword = Hashing.hashPassword(confirmPassword)
-            let user = new User(uid, name, email, confirmPassword, role, phone, "", {})
-            let obj = user.toFirestore()
-            addUser(obj).then(() => {
-                toast("SUCCESS", {style: {backgroundColor: '#4caf50', color: '#fff'}})
-                setLoading(false);
+            let user = User.createBasic(email, password, role)
+            checkUserExists(user).then((status) => {
+                console.log(status);
+                if (status) {
+                    const router = useRouter();
+                    router.push('/home');
+                }
+                setLoading(false)
 
             }).catch((err) => {
-                toast("FAILED", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
+                toast(err);
                 setLoading(false);
-
-
             })
 
 
         } else {
             let errors = status.errors;
-            if (errors.length === 0) {
-                toast("Something went wrong. Try again!", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
+            for (let i = 0; i < errors.length; i++) {
+                toast(errors[i], {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
 
-            } else {
-                for (let i = 0; i < errors.length; i++) {
-                    toast(errors[i], {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
-
-                }
             }
-
             setLoading(false);
 
 
@@ -93,36 +118,23 @@ export default function Registration() {
 
     };
 
-    function performCheck(name, email, password, confirmPassword, phone, role) {
+    function performCheck(email, password, role) {
         let idx = 0;
-        let _idx = 5;
-        const phoneRegex = /^\+\d+/;
+        let _idx = 3;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         let roles = ['admin', "doctor", "nurse", "receptionist", "patient"]
         let errors = []
-        if (name.length > 0) {
-            idx += 1;
-        } else {
-            errors.push("Name should not be empty")
-        }
+
         if (emailRegex.test(email)) {
-            idx += 1;
+            idx++;
         } else {
             errors.push("Wrong email format")
         }
-        if (password === confirmPassword) {
-            idx += 1;
-        } else {
-            errors.push("Confirm password mismatch")
-        }
-
-        if (phoneRegex.test(phone)) {
-            idx += 1
-        } else {
-            errors.push("Add country code to phone number")
+        if (password > 0) {
+            idx++
         }
         if (roles.includes(role)) {
-            idx += 1;
+            idx++;
         } else {
             errors.push("Select a role")
         }
@@ -147,26 +159,10 @@ export default function Registration() {
                     width={100}
                     height={100}
                 />
-                <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Pulse360 Registration</h2>
+                <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Pulse360 Login</h2>
 
-                <form onSubmit={submit}>
-                    {/* Full Name */}
-                    <div className="mb-4">
-                        <label
-                            htmlFor="fullName"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            id="fullName"
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-primary"
-                            placeholder="Enter your full name"
-                            value={formData.fullName}
-                            onChange={handleChange}
-                        />
-                    </div>
+                <form onSubmit={submitLogin}>
+
 
                     {/* Email */}
                     <div className="mb-4">
@@ -204,41 +200,6 @@ export default function Registration() {
                         />
                     </div>
 
-                    {/* Confirm Password */}
-                    <div className="mb-4">
-                        <label
-                            htmlFor="confirmPassword"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                            Confirm Password
-                        </label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            className="text-primary w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                            placeholder="Confirm your password"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Contact Number */}
-                    <div className="mb-4">
-                        <label
-                            htmlFor="contact"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                            Contact Number
-                        </label>
-                        <input
-                            type="text"
-                            id="contact"
-                            className="text-primary w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                            placeholder="Enter your contact number"
-                            value={formData.contact}
-                            onChange={handleChange}
-                        />
-                    </div>
 
                     {/* Role Dropdown */}
                     <div className="mb-4">
@@ -269,7 +230,7 @@ export default function Registration() {
                             type="submit"
                             className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-black"
                         >
-                            Register
+                            Login
                         </button>)}
 
 
@@ -278,9 +239,9 @@ export default function Registration() {
 
                 {/* Login Link */}
                 <p className="mt-4 text-sm text-center text-gray-600">
-                    Already have an account?{" "}
-                    <a href="/login" className="text-blue-500 hover:underline">
-                        Login here
+                    Do not have an account?{" "}
+                    <a href="/register" className="text-blue-500 hover:underline">
+                        Register here
                     </a>
                 </p>
             </div>

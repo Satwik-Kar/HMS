@@ -1,9 +1,9 @@
 
-import Home from "@/pages/splashscreen";
+import SplashScreen from "@/pages/splashscreen";
 
 export default function Page() {
   return (
-      <Home/>
+      <SplashScreen/>
 
   );
 }
