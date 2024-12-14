@@ -57,7 +57,7 @@ export default function Registration() {
         let status = performCheck(name, email, password, confirmPassword, phone, role);
         if (status.success) {
             console.log("success");
-            let uid = uuidv4();
+            let uid = uuidv4().slice(0,8);
             email = encrypt(email)
             confirmPassword = Hashing.hashPassword(confirmPassword)
             let user = new User(uid, name, email, confirmPassword, role, phone, "", {})

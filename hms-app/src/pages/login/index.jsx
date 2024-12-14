@@ -10,7 +10,7 @@ import Hashing from "@/app/security/Hashing";
 import Loader from "@/app/components/loader_component";
 import {db} from "../../../firebase.config";
 import {collection, getDocs} from "firebase/firestore";
-import {useRouter} from "next/navigation";
+import {useRouter} from "next/router";
 
 
 export default function Login() {
@@ -57,22 +57,23 @@ export default function Login() {
         if (userDoc !== -1) {
             const storedHashedPassword = userDoc.password;
             const storedRole = userDoc.role;
+            const storedId = userDoc.id
             const comparePassword = Hashing.compareHash(password, storedHashedPassword);
 
             let roleMatch = role === storedRole;
             if (comparePassword && roleMatch) {
                 toast("Login successful", {style: {backgroundColor: '#4caf50', color: '#fff'}})
-                return true;
+                return {success: true, id: storedId};
 
             } else {
                 toast("Credentials mismatch", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
-                return false;
+                return {success: false};
 
             }
         } else {
 
             toast("User do not exist", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
-            return false;
+            return {success: false};
         }
 
 
@@ -95,8 +96,14 @@ export default function Login() {
             let user = User.createBasic(email, password, role)
             checkUserExists(user).then((status) => {
                 console.log(status);
-                if (status) {
-                    router.push('/home');
+                if (status.success) {
+                    router.push({
+                        pathname: '/home',
+                        query: {id: status.id, role: role}
+                    });
+                } else {
+                    toast("User do not exist", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
+
                 }
                 setLoading(false)
 
