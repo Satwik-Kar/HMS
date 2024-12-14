@@ -73,7 +73,7 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-            <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-3xl">
+            <div className="bg-white shadow-lg rounded-lg p-6 w-full">
                 <h1 className="text-2xl font-bold text-primary mb-4">Welcome to Pulse360</h1>
                 <p className="mb-4 text-gray-700">
                     User: <span className="font-medium">{userData.id}</span> | Role:{" "}
