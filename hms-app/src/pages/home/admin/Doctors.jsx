@@ -1,5 +1,6 @@
 import {motion} from "framer-motion";
 import {useState} from "react";
+import {useRouter} from "next/router";
 
 const initialDoctorsData = [
     {
@@ -54,7 +55,7 @@ const initialDoctorsData = [
 
 export default function Doctors() {
     const [doctors, setDoctors] = useState(initialDoctorsData);
-
+    const router = useRouter();
     const handleDelete = (id) => {
         const updatedDoctors = doctors.filter((doctor) => doctor.id !== id);
         setDoctors(updatedDoctors);
@@ -66,8 +67,10 @@ export default function Doctors() {
     };
 
     const handleAddDoctor = () => {
-        alert("Add new doctor");
-        // Implement add doctor form/modal here
+        router.push("/home/admin/AddDoctor")
+
+
+
     };
 
     return (
