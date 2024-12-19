@@ -18,6 +18,18 @@ export default function Home() {
         } else {
             router.push("/login");
         }
+
+        const blockBack = () => {
+            if (window.history.state && window.history.state.idx > 0) {
+                window.history.go(1); // Prevent going back
+            }
+        };
+
+        window.addEventListener('popstate', blockBack);
+        return () => {
+            window.removeEventListener('popstate', blockBack);
+        };
+
     }, [router]);
 
     const navLinks = () => {
