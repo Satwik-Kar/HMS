@@ -55,49 +55,49 @@ export default function AddDoctor() {
         if (name.length > 0) {
             idx++
         } else {
-            errors.push("name")
+            errors.push("Fill up Name field")
         }
         if (specialty.length > 0) {
             idx++
         } else {
-            errors.push("specialty")
+            errors.push("Fill up Specialty field")
         }
         if (parseInt(experience) > 0) {
             idx++
         } else {
-            errors.push("experience")
+            errors.push("Fill up Experience field")
         }
         if (qualification.length > 0) {
             idx++
         } else {
-            errors.push("qualification")
+            errors.push("Fill up Qualification field")
         }
         if (department.length > 0) {
             idx++
         } else {
-            errors.push("department")
+            errors.push("Fill up Department field")
         }
         if (shift.length > 0) {
             idx++
         } else {
-            errors.push("shift")
+            errors.push("Fill up Shift field")
         }
         if (parseInt(salary) > 0) {
             idx++
         } else {
-            errors.push("salary")
+            errors.push("Fill up Salary field")
         }
         console.log(contact)
         console.log(String(contact))
         if (phoneRegex.test(contact)) {
             idx++
         } else {
-            errors.push("contact")
+            errors.push("Fill up Contact field")
         }
         if (emailRegex.test(email)) {
             idx++
         } else {
-            errors.push("email")
+            errors.push("Fill up Email field")
         }
 
         if (idx === idx_ && errors.length === 0) {
