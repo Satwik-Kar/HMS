@@ -6,10 +6,7 @@ import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {decrypt} from "@/app/security/cryptography";
 import User from "@/app/models/User";
-import Hashing from "@/app/security/Hashing";
 import Loader from "@/app/components/loader_component";
-import {db} from "../../../firebase.config";
-import {collection, getDocs} from "firebase/firestore";
 import {useRouter} from "next/router";
 
 
@@ -62,9 +59,7 @@ export default function Login() {
             },
             body: JSON.stringify(user),
         });
-        const result = await response.json();
-        console.log(result);
-
+        return await response.json()
 
     }
 
@@ -85,7 +80,7 @@ export default function Login() {
             let user = User.createBasic(email, password, role)
             checkUserExists(user).then((status) => {
                 console.log(status);
-                if (status.success) {
+                if (status.status) {
                     router.push({
                         pathname: '/home',
                         query: {id: status.id, role: role}

@@ -1,5 +1,6 @@
 package com.pulse.Pulse360.database.controller;
 
+import com.pulse.Pulse360.database.models.ReturnUser;
 import com.pulse.Pulse360.database.models.User;
 import com.pulse.Pulse360.database.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class UserController {
 
     }
     @PostMapping("/login")
-    public boolean checkLogin(@RequestBody User user) {
+    public ReturnUser checkLogin(@RequestBody User user) {
 
         return userService.isLoginUser(user);
     }

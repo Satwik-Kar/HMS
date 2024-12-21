@@ -1,5 +1,6 @@
 package com.pulse.Pulse360.database.services;
 
+import com.pulse.Pulse360.database.models.ReturnUser;
 import com.pulse.Pulse360.database.models.User;
 import com.pulse.Pulse360.database.JPArepositories.UserCRUD;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserCRUD userCRUD;
 
@@ -32,9 +34,8 @@ public class UserService {
 
     }
 
-    public boolean isLoginUser(User rawUser) {
+    public ReturnUser isLoginUser(User rawUser) {
         List<User> userList = userCRUD.findAll();
-        boolean isLogin = false;
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         for (User user : userList) {
             String decryptedEmail = encryptionService.decrypt(user.getEmail());
@@ -42,14 +43,15 @@ public class UserService {
                 boolean passwordMatch = passwordEncoder.matches(rawUser.getPassword(), user.getPassword());
                 boolean roleMatch = user.getRole().equals(rawUser.getRole());
                 if (passwordMatch && roleMatch) {
-                    isLogin = true;
+                    return new ReturnUser(true, user.getId());
+
                 }
 
             }
 
 
         }
-        return isLogin;
+        return new ReturnUser(false);
 
 
     }
