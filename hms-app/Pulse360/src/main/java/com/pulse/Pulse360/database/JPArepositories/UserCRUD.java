@@ -1,4 +1,4 @@
-package com.pulse.Pulse360.database.repositories;
+package com.pulse.Pulse360.database.JPArepositories;
 
 import com.pulse.Pulse360.database.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;

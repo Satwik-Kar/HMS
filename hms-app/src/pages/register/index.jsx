@@ -2,23 +2,30 @@
 import {useState} from "react";
 import "../../app/globals.css";
 import {v4 as uuidv4} from 'uuid';
-import {addDoc, collection} from 'firebase/firestore';
 
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {encrypt} from "@/app/security/cryptography";
 import User from "@/app/models/User";
-import {db} from "../../../firebase.config";
 import Hashing from "@/app/security/Hashing";
 import Loader from "@/app/components/loader_component";
 
 const addUser = async (details) => {
     try {
-        const docRef = await addDoc(collection(db, "users"), details);
-        console.log("Document written with ID: ", docRef.id);
+        const registerUrl = "http://localhost:8080/register"
+        const response = await fetch(registerUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(details),
+        });
+        const result = await response.json();
+        console.log('Success:', result);
     } catch (e) {
-        console.error("Error adding document: ", e);
+        console.error("Error adding user: ", e);
     }
+
 };
 export default function Registration() {
     // State variables for form inputs
@@ -43,9 +50,8 @@ export default function Registration() {
 
     // Handle form submission
     const submit = (e) => {
-          e.preventDefault();
+        e.preventDefault();
         setLoading(true);
-
 
 
         const name = formData.fullName;
@@ -57,11 +63,9 @@ export default function Registration() {
         let status = performCheck(name, email, password, confirmPassword, phone, role);
         if (status.success) {
             console.log("success");
-            let uid = uuidv4().slice(0,8);
-            email = encrypt(email)
-            confirmPassword = Hashing.hashPassword(confirmPassword)
-            let user = new User(uid, name, email, confirmPassword, role, phone, "", {})
-            let obj = user.toFirestore()
+            let user = new User(name,email,confirmPassword,role,phone,"");
+            let obj = user.toJSON()
+            console.log(obj);
             addUser(obj).then(() => {
                 toast("SUCCESS", {style: {backgroundColor: '#4caf50', color: '#fff'}})
                 setLoading(false);

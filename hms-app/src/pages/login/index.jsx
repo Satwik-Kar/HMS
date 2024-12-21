@@ -47,34 +47,23 @@ export default function Login() {
     }
 
     async function checkUserExists(user) {
-        console.log(user);
-        const usersCollection = collection(db, "users");
+        console.log("check",user);
+        // const usersCollection = collection(db, "users");
         const email = user.email
         const password = user.password
         const role = user.role
-        const querySnapshot = await getDocs(usersCollection);
-        let userDoc = getSnapshotDocument(querySnapshot, email)
-        if (userDoc !== -1) {
-            const storedHashedPassword = userDoc.password;
-            const storedRole = userDoc.role;
-            const storedId = userDoc.id
-            const comparePassword = Hashing.compareHash(password, storedHashedPassword);
-
-            let roleMatch = role === storedRole;
-            if (comparePassword && roleMatch) {
-                toast("Login successful", {style: {backgroundColor: '#4caf50', color: '#fff'}})
-                return {success: true, id: storedId};
-
-            } else {
-                toast("Credentials mismatch", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
-                return {success: false};
-
-            }
-        } else {
-
-            toast("User do not exist", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
-            return {success: false};
-        }
+        // const querySnapshot = await getDocs(usersCollection);
+        // let userDoc = getSnapshotDocument(querySnapshot, email)
+        const checkLoginUrl = "http://localhost:8080/login"
+        const response = await fetch(checkLoginUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(user),
+        });
+        const result = await response.json();
+        console.log(result);
 
 
     }
