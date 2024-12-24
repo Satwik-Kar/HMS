@@ -12,25 +12,15 @@ export default function Home() {
     const [activeView, setActiveView] = useState("Doctors"); // Default view
 
     useEffect(() => {
-        const {id, role} = router.query;
-        if (id && role) {
-            setUserData({id, role});
+        const {id, role,sessionId} = router.query;
+        if (id && role && sessionId) {
+            setUserData({id, role,sessionId});
+            sessionStorage.setItem("sessionID", sessionId);
+
         } else {
             router.push("/login");
         }
-
-        const blockBack = () => {
-            if (window.history.state && window.history.state.idx > 0) {
-                window.history.go(1); // Prevent going back
-            }
-        };
-
-        window.addEventListener('popstate', blockBack);
-        return () => {
-            window.removeEventListener('popstate', blockBack);
-        };
-
-    }, [router]);
+    }, []);
 
     const navLinks = () => {
         switch (userData.role) {
@@ -89,7 +79,8 @@ export default function Home() {
                 <h1 className="text-2xl font-bold text-primary mb-4">Welcome to Pulse360</h1>
                 <p className="mb-4 text-gray-700">
                     User: <span className="font-medium">{userData.id}</span> | Role:{" "}
-                    <span className="font-medium capitalize">{userData.role}</span>
+                    <span className="font-medium capitalize">{userData.role}</span> | Session:{" "}
+                    <span className="font-medium capitalize">{userData.sessionId}</span>
                 </p>
                 <hr className="border-t border-gray-300 mb-6"/>
 

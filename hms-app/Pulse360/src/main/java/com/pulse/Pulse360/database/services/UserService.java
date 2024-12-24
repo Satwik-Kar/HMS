@@ -1,6 +1,8 @@
 package com.pulse.Pulse360.database.services;
 
+import com.pulse.Pulse360.database.JPArepositories.SessionCRUD;
 import com.pulse.Pulse360.database.models.ReturnUser;
+import com.pulse.Pulse360.database.models.Session;
 import com.pulse.Pulse360.database.models.User;
 import com.pulse.Pulse360.database.JPArepositories.UserCRUD;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 
 @Service
@@ -16,7 +19,8 @@ public class UserService {
 
     @Autowired
     private UserCRUD userCRUD;
-
+    @Autowired
+    private SessionCRUD sessionCRUD;
     @Autowired
     private EncryptionService encryptionService;
 
@@ -43,7 +47,17 @@ public class UserService {
                 boolean passwordMatch = passwordEncoder.matches(rawUser.getPassword(), user.getPassword());
                 boolean roleMatch = user.getRole().equals(rawUser.getRole());
                 if (passwordMatch && roleMatch) {
-                    return new ReturnUser(true, user.getId());
+
+                    Session session = new Session();
+                    session.setUserId(user.getId());
+                    long millis = System.currentTimeMillis();
+                    session.setCreatedAtMillis(millis);
+                    session.setUpdatedAtMillis(millis);
+                    long thirtyMinutesInMillis = 30 * 60 * 1000;
+                    session.setExpiresAtMillis((millis + thirtyMinutesInMillis));
+                    session = sessionCRUD.save(session);
+
+                    return new ReturnUser(true, user.getId(), session.getSessionId());
 
                 }
 

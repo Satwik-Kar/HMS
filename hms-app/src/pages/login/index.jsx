@@ -83,10 +83,10 @@ export default function Login() {
                 if (status.status) {
                     router.push({
                         pathname: '/home',
-                        query: {id: status.id, role: role}
+                        query: {id: status.id, role: role,sessionId:status.sessionId}
                     });
                 } else {
-                    toast("User do not exist", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
+                    toast("User does not exist", {style: {backgroundColor: '#FF4D4F', color: '#fff'}})
 
                 }
                 setLoading(false)
